@@ -7,12 +7,25 @@ This python script pulls the data from the pi's TCP datastream on port 30003 and
 
 Clone the repository.
 ```bash
-git clone https://github.com/apfrancis1992/python-adsb-2-postgres.git
+git clone https://github.com/apfrancis1992/adsb-postgres-flight-log.git /opt
+```
+
+Navigate to the root directory and create your configuration file.
+```bash
+nano /opt/adsb-postgres-flight-log/config.py
+```
+
+Enter the following credentials and info
+```bash
+username = "username" # Postgres DB Username
+password = "password" # Postgres DB Password
+lat = "xx.xxxx" # ADS-B latitude
+lon = "-xx.xxxx" # ADS-B longitude
 ```
 
 Install the python dependencies.
 ```bash
-pip3 install psycopg2-binary
+pip3 install /opt/adsb-postgres-flight-log/requirements.txt
 ```
 
 ## Postgres
