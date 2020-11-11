@@ -24,7 +24,7 @@ EXIT;
 
 Clone the repository.
 ```bash
-git clone https://github.com/apfrancis1992/adsb-postgres-flight-log.git /opt
+git clone https://github.com/apfrancis1992/adsb-postgres-flight-log.git /opt/adsb-postgres-flight-log
 ```
 
 Navigate to the root directory and create your configuration file.
