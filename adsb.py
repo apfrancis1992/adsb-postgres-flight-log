@@ -117,7 +117,7 @@ def main():
 
     cur.execute("""
             CREATE OR REPLACE VIEW locations AS
-              SELECT hex_ident, n_num, parsed_time, lon, lat, altitude
+              SELECT hex_ident, n_num, parsed_time, lon, lat, altitude, distance_nm
                 FROM squitters WHERE lat >= 0;
     """)
 
