@@ -1,7 +1,7 @@
 # ADS-B Logger
 Takes ADS-B data from a local receiver and copies it to a local postgres DB.
 
-This python script pulls the data from FlightRadar24s raspberry pi receiver and processes the data and commits it to a local Postgres database.
+This python script pulls the data from the pi's TCP datastream on port 30003 and processes the data to be commited to a local Postgres database.
 
 ## Installation
 
