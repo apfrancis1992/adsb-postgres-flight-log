@@ -61,7 +61,7 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=username # local linux user to run the program
+User=username
 ExecStart=/usr/bin/python3 /opt/adsb-postgres-flight-log/adsb.py
 
 [Install]
