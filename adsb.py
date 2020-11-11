@@ -123,7 +123,7 @@ def main():
 
     cur.execute("""
             CREATE OR REPLACE VIEW log_view AS
-              SELECT hex_ident, n_num, altitude, ground_speed, track, lat, lon, vertical_rate, squawk, emergency, spi, is_on_ground, generated_date, generated_time, parsed_time
+              SELECT hex_ident, n_num, altitude, ground_speed, track, lat, lon, distance_nm, vertical_rate, squawk, emergency, spi, is_on_ground, generated_date, generated_time, parsed_time
                 FROM squitters
                 INNER JOIN flight_log
                 ON squitters.parsed_time > flight_log.start_time AND squitters.parsed_time < flight_log.end_time AND squitters.n_num = flight_log.n_num_log
