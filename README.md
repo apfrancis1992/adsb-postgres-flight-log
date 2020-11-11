@@ -3,6 +3,23 @@ Takes ADS-B data from a local receiver and copies it to a local postgres DB.
 
 This python script pulls the data from the pi's TCP datastream on port 30003 and processes the data to be commited to a local Postgres database.
 
+## PostgreSQL Preparation
+
+SSH to your postgres instance to create a user and database for the program to use.
+```bash
+ssh username@IP
+sudo apt-get install postgresql
+psql -d postgres
+```
+
+```
+CREATE USER username WITH PASSWORD 'password'; 
+ALTER USER username WITH SUPERUSER;
+CREATE DATABASE aircraft;
+EXIT;
+```
+
+
 ## Installation
 
 Clone the repository.
@@ -28,22 +45,28 @@ Install the python dependencies.
 pip3 install /opt/adsb-postgres-flight-log/requirements.txt
 ```
 
-## Postgres
-
-SSH to your postgres instance to create a user and database for the program to use.
+Create a Systemd start file
 ```bash
-ssh username@IP
-sudo apt-get install postgresql
-psql -d postgres
+sudo nano /etc/systemd/system/adsb.service
 ```
 
-```
-CREATE USER username WITH PASSWORD 'password'; 
-ALTER USER username WITH SUPERUSER;
-CREATE DATABASE aircraft;
-EXIT;
-```
+Enter the following config info
+```bash
+[Unit]
+Description=ADS-B Data Capture
+After=network.target
+StartLimitIntervalSec=0
 
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=username # local linux user to run the program
+ExecStart=/usr/bin/python3 /opt/adsb-postgres-flight-log/adsb.py
+
+[Install]
+WantedBy=multi-user.target
+```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
