@@ -3,6 +3,7 @@ import datetime
 import argparse
 import time
 import psycopg2
+import logging
 import sys
 import os
 import config
@@ -23,6 +24,9 @@ port = '5432'
 dbname = 'aircraft'
 user = config.username
 password = config.password
+
+#Logging
+log = "/var/log/adsb.log"
 
 def main():
 
@@ -46,7 +50,9 @@ def main():
     # connect to database or create if it doesn't exist
     conn = psycopg2.connect(host = host, database = dbname, user = user, password = password)
     cur = conn.cursor()
-    #cur.execute('PRAGMA journal_mode=wal')
+
+    # logging
+    logging.basicConfig(filename=log, format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
 
     # set up the table if neccassary
     cur.execute("""CREATE TABLE IF NOT EXISTS
@@ -119,11 +125,11 @@ def main():
         try:
             s = connect_to_socket(args.location, args.port)
             count_failed_connection_attempts = 1
-            print("Connected to dump1090 broadcast")
+            logging.info("Connected to dump1090 broadcast")
             break
         except socket.error:
             count_failed_connection_attempts += 1
-            print("Cannot connect to dump1090 broadcast. Making attempt %s." % (count_failed_connection_attempts))
+            logging.error("Cannot connect to dump1090 broadcast. Making attempt %s." % (count_failed_connection_attempts))
             time.sleep(args.connect_attempt_delay)
     else:
         quit()
@@ -136,7 +142,6 @@ def main():
             #get current time
             cur_time = datetime.datetime.utcnow()
             ds = cur_time.isoformat()
-            ts = cur_time.strftime("%H:%M:%S")
 
             # receive a stream message
             try:
@@ -149,7 +154,7 @@ def main():
                 pass
 
             if len(message) == 0:
-                print(ts, "No broadcast received. Attempting to reconnect")
+                logging.warning("No broadcast received. Attempting to reconnect")
                 time.sleep(args.connect_attempt_delay)
                 s.close()
 
@@ -157,11 +162,11 @@ def main():
                     try:
                         s = connect_to_socket(args.location, args.port)
                         count_failed_connection_attempts = 1
-                        print("Reconnected!")
+                        logging.info("Reconnected")
                         break
                     except socket.error:
                         count_failed_connection_attempts += 1
-                        print("The attempt failed. Making attempt %s." % (count_failed_connection_attempts))
+                        logging.warning("Reconnection attempt failed. Making attempt %s." % (count_failed_connection_attempts))
                         time.sleep(args.connect_attempt_delay)
                 else:
                     quit()
@@ -259,10 +264,10 @@ def main():
                             count_since_commit = 0
 
                     except psycopg2.OperationalError:
-                        print(ts, "Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + args.batch_size,))
+                        logging.error("Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + args.batch_size,))
 
                     except psycopg2.OperationalError:
-                        print(ts, "Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + args.batch_size,))
+                        logging.error("Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + args.batch_size,))
                     # since everything was valid we reset the stream message
                     data_str = ""
                 else:
@@ -271,15 +276,15 @@ def main():
                     continue
 
     except KeyboardInterrupt:
-        print("\n%s Closing connection" % (ts,))
+        logging.info("Closing connection")
         s.close()
 
         conn.commit()
         conn.close()
-        print(ts, "%s squitters added to your database" % (count_total))
+        logging.info("%s squitters added to your database" % (count_total))
 
     except psycopg2.ProgrammingError:
-        print("Error with ", line)
+        logging.error("Error with %s" % line)
         quit()
 
 def connect_to_socket(loc,port):
