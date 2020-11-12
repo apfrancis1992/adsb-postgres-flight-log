@@ -74,6 +74,11 @@ sudo touch /var/log/adsb.log
 sudo chown username:username /var/log/adsb.log
 ```
 
+## Credit
+@guillaumemichel for his ICAO to N Number converter https://github.com/guillaumemichel/icao-nnumber_converter
+@yanofsky for his Dump1090 Stream parser https://github.com/yanofsky/dump1090-stream-parser
+
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
