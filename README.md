@@ -68,6 +68,12 @@ ExecStart=/usr/bin/python3 /opt/adsb-postgres-flight-log/adsb.py
 WantedBy=multi-user.target
 ```
 
+Create a log file for the program
+```bash
+sudo touch /var/log/adsb.log
+sudo chown username:username /var/log/adsb.log
+```
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
