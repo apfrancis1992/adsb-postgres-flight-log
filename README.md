@@ -42,7 +42,7 @@ lon = "-xx.xxxx" # ADS-B longitude
 
 Install the python dependencies.
 ```bash
-pip3 install /opt/adsb-postgres-flight-log/requirements.txt
+pip3 install -r /opt/adsb-postgres-flight-log/requirements.txt
 ```
 
 Create a Systemd start file
