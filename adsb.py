@@ -184,7 +184,7 @@ def main():
                     try:
                         line.append(icao_to_n(line[4]))
                     except:
-                        pass
+                        line.append(None)
                     try:
                         if line[0] != 'MSG':
                             line[0] = 'MSG'
