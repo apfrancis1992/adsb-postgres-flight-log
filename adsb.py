@@ -1,6 +1,5 @@
 import socket
 import datetime
-import argparse
 import time
 import psycopg2
 import logging
@@ -29,18 +28,6 @@ password = config.password
 log = "/var/log/adsb.log"
 
 def main():
-
-    #set up command line options
-    parser = argparse.ArgumentParser(description="A program to process dump1090 messages then insert them into a database")
-    parser.add_argument("-l", "--location", type=str, default=HOST, help="This is the network location of your dump1090 broadcast. Defaults to %s" % (HOST))
-    parser.add_argument("-p", "--port", type=int, default=PORT, help="The port broadcasting in SBS-1 BaseStation format. Defaults to %s" % (PORT))
-    parser.add_argument("--buffer-size", type=int, default=BUFFER_SIZE, help="An integer of the number of bytes to read at a time from the stream. Defaults to %s" % (BUFFER_SIZE))
-    parser.add_argument("--batch-size", type=int, default=BATCH_SIZE, help="An integer of the number of rows to write to the database at a time. If you turn off WAL mode, a lower number makes it more likely that your database will be locked when you try to query it. Defaults to %s" % (BATCH_SIZE))
-    parser.add_argument("--connect-attempt-limit", type=int, default=CONNECT_ATTEMPT_LIMIT, help="An integer of the number of times to try (and fail) to connect to the dump1090 broadcast before qutting. Defaults to %s" % (CONNECT_ATTEMPT_LIMIT))
-    parser.add_argument("--connect-attempt-delay", type=float, default=CONNECT_ATTEMPT_DELAY, help="The number of seconds to wait after a failed connection attempt before trying again. Defaults to %s" % (CONNECT_ATTEMPT_DELAY))
-
-    # parse command line options
-    args = parser.parse_args()
 
     # print args.accumulate(args.in)
     count_since_commit = 0
@@ -121,16 +108,16 @@ def main():
 
 
     # open a socket connection
-    while count_failed_connection_attempts < args.connect_attempt_limit:
+    while count_failed_connection_attempts < CONNECT_ATTEMPT_LIMIT:
         try:
-            s = connect_to_socket(args.location, args.port)
+            s = connect_to_socket(HOST, PORT)
             count_failed_connection_attempts = 1
             logging.info("Connected to dump1090 broadcast")
             break
         except socket.error:
             count_failed_connection_attempts += 1
             logging.error("Cannot connect to dump1090 broadcast. Making attempt %s." % (count_failed_connection_attempts))
-            time.sleep(args.connect_attempt_delay)
+            time.sleep(CONNECT_ATTEMPT_DELAY)
     else:
         quit()
 
@@ -146,7 +133,7 @@ def main():
             # receive a stream message
             try:
                 message = ""
-                message = s.recv(args.buffer_size)
+                message = s.recv(BUFFER_SIZE)
                 message = message.decode('utf-8')
                 data_str = message.strip("\n")
             except socket.error:
@@ -155,19 +142,19 @@ def main():
 
             if len(message) == 0:
                 logging.warning("No broadcast received. Attempting to reconnect")
-                time.sleep(args.connect_attempt_delay)
+                time.sleep(CONNECT_ATTEMPT_DELAY)
                 s.close()
 
-                while count_failed_connection_attempts < args.connect_attempt_limit:
+                while count_failed_connection_attempts < CONNECT_ATTEMPT_LIMIT:
                     try:
-                        s = connect_to_socket(args.location, args.port)
+                        s = connect_to_socket(HOST, PORT)
                         count_failed_connection_attempts = 1
                         logging.info("Reconnected")
                         break
                     except socket.error:
                         count_failed_connection_attempts += 1
                         logging.warning("Reconnection attempt failed. Making attempt %s." % (count_failed_connection_attempts))
-                        time.sleep(args.connect_attempt_delay)
+                        time.sleep(CONNECT_ATTEMPT_DELAY)
                 else:
                     quit()
 
@@ -259,15 +246,15 @@ def main():
                         count_since_commit += 1
 
                         # commit the new rows to the database in batches
-                        if count_since_commit % args.batch_size == 0:
+                        if count_since_commit % BATCH_SIZE == 0:
                             conn.commit()
                             count_since_commit = 0
 
                     except psycopg2.OperationalError:
-                        logging.error("Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + args.batch_size,))
+                        logging.error("Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + BATCH_SIZE,))
 
                     except psycopg2.OperationalError:
-                        logging.error("Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + args.batch_size,))
+                        logging.error("Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + BATCH_SIZE,))
                     # since everything was valid we reset the stream message
                     data_str = ""
                 else:
