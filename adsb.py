@@ -3,8 +3,6 @@ import datetime
 import time
 import psycopg2
 import logging
-import sys
-import os
 import config
 from icao import icao_to_n
 from haversine import haversine, Unit

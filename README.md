@@ -74,6 +74,10 @@ sudo touch /var/log/adsb.log
 sudo chown username:username /var/log/adsb.log
 ```
 
+## ToDo
+1. Create tail number tracking to record certain tail numbers.
+2. Create a web frontend to view the contents of the database on a map.
+
 ## Credit
 [@guillaumemichel](https://github.com/guillaumemichel) for his [ICAO – N-Number Converter](https://github.com/guillaumemichel/icao-nnumber_converter).<br/>
 [@yanofsky](https://github.com/yanofsky) for his [dump1090 stream parser](https://github.com/yanofsky/dump1090-stream-parser).
