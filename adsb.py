@@ -42,69 +42,23 @@ def main():
     logging.basicConfig(filename=log, format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
 
     # set up the table if neccassary
-    cur.execute("""CREATE TABLE IF NOT EXISTS
-        squitters(
-            message_type TEXT,
-            transmission_type INT,
-            session_id INT,
-            aircraft_id INT,
-            hex_ident TEXT,
-            n_num TEXT,
-            flight_id SMALLINT,
-            generated_date DATE,
-            generated_time TIME,
-            logged_date DATE,
-            logged_time TIME,
-            callsign TEXT,
-            altitude INT,
-            ground_speed REAL,
-            track REAL,
-            lat FLOAT8,
-            lon FLOAT8,
-            vertical_rate SMALLINT,
-            distance_nm FLOAT8,
-            distance_miles FLOAT8,
-            squawk SMALLINT,
-            alert SMALLINT,
-            emergency SMALLINT,
-            spi SMALLINT,
-            is_on_ground SMALLINT,
-            parsed_time TIMESTAMP
-        );
-    """)
+# Open and read the file as a single buffer
+    fd = open('aircraft.sql', 'r')
+    sqlFile = fd.read()
+    fd.close()
 
-    cur.execute("""CREATE TABLE IF NOT EXISTS
-        flight_log(
-            log_id SERIAL PRIMARY KEY,
-            n_num_log TEXT,
-            pilot_name TEXT,
-            start_time TIMESTAMP,
-            end_time TIMESTAMP
-        );
-    """)
+    # all SQL commands (split on ';')
+    sqlCommands = sqlFile.split(';')
 
-    cur.execute("""
-            CREATE OR REPLACE VIEW callsigns AS
-              SELECT callsign, hex_ident, n_num, date(parsed_time) date_seen, max(parsed_time) last_seen, min(parsed_time) first_seen
-                FROM squitters
-                WHERE callsign != ''
-                GROUP BY callsign, hex_ident, n_num, date_seen;
-    """)
-
-    cur.execute("""
-            CREATE OR REPLACE VIEW locations AS
-              SELECT hex_ident, n_num, parsed_time, lon, lat, altitude, distance_nm
-                FROM squitters WHERE lat >= 0;
-    """)
-
-    cur.execute("""
-            CREATE OR REPLACE VIEW log_view AS
-              SELECT hex_ident, n_num, altitude, ground_speed, track, lat, lon, distance_nm, vertical_rate, squawk, emergency, spi, is_on_ground, generated_date, generated_time, parsed_time
-                FROM squitters
-                INNER JOIN flight_log
-                ON squitters.parsed_time > flight_log.start_time AND squitters.parsed_time < flight_log.end_time AND squitters.n_num = flight_log.n_num_log
-                ORDER BY parsed_time;
-    """)
+    # Execute every command from the input file
+    for command in sqlCommands:
+        # This will skip and report errors
+        # For example, if the tables do not yet exist, this will skip over
+        # the DROP TABLE commands
+        try:
+            cur.execute(command)
+        except psycopg2.ProgrammingError:
+            logging.error("Error running SQL command")
 
 
     # open a socket connection
