@@ -61,6 +61,7 @@ def suffix_offset(s):
     ...
     'ZZ' -> 600
     """
+
     if len(s)==0:
         return 0
     valid = True
