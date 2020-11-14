@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS
 
 CREATE TABLE IF NOT EXISTS
         plane_tracker(
-            n_num text PRIMARY KEY,
+            n_num_tracked text PRIMARY KEY,
             active BOOLEAN
         );
 
@@ -73,5 +73,5 @@ CREATE OR REPLACE VIEW tracked_planes AS
             SELECT hex_ident, n_num, altitude, ground_speed, track, lat, lon, distance_nm, vertical_rate, squawk, emergency, spi, is_on_ground, generated_date, generated_time, parsed_time
                 FROM squitters
                 INNER JOIN plane_tracker
-                ON squitters.n_num = plane_tracker.n_num_log AND plane_tracker.active = 'yes'
+                ON squitters.n_num = plane_tracker.n_num_tracked AND plane_tracker.active = 'yes'
                 ORDER BY parsed_time DESC;
