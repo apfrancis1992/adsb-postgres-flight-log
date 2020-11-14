@@ -4,6 +4,7 @@ import time
 import psycopg2
 import logging
 import config
+import os
 from icao import icao_to_n
 from haversine import haversine, Unit
 
@@ -24,7 +25,8 @@ password = config.password
 
 #Logging
 log = "/var/log/adsb.log"
-
+cwd = os.getcwd()
+sql = cwd
 def main():
 
     # print args.accumulate(args.in)
@@ -41,7 +43,7 @@ def main():
 
     # set up the table if neccassary
 # Open and read the file as a single buffer
-    fd = open('aircraft.sql', 'r')
+    fd = open(os.path.join(cwd, 'aircraft.sql'), 'r')
     sqlFile = fd.read()
     fd.close()
 
