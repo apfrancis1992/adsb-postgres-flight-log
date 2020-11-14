@@ -25,7 +25,7 @@ password = config.password
 
 #Logging
 log = "/var/log/adsb.log"
-cwd = os.getcwd()
+cwd = os.path.dirname(os.path.realpath(__file__))
 sql = cwd
 def main():
 
